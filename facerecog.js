@@ -46,6 +46,36 @@ function loadModel() {
     recognizer.load(values);
 }
 
+function trainSingle(singleName) {
+    const numJitters = 15;
+    var set = [];
+    loadModel();
+    fs.readdir("train", function (err, files) {
+        var flag = false;
+        files.forEach(function (image, innerIndex) {
+            if (flag) { return; }
+            var trainFile = path.join("train", image);
+            const targetSize = 200;
+            console.log(trainFile);
+            var faceImage = detector.detectFaces(fr.loadImage(trainFile), targetSize);
+            if (faceImage.length === 0) {
+                flag = true;
+                return;
+            }
+            console.log('Analyzing ' + image);
+            set.push(...faceImage);
+        });
+        console.log('Training for ' + singleName);
+        try {
+            recognizer.addFaces(set, singleName, numJitters);
+            const modelState = recognizer.serialize();
+            fs.writeFileSync('model.json', JSON.stringify(modelState));
+        } catch (err) {
+            dialog.showMessageBox({ title: "Error", message: "No face detected, ensure you are looking at the camera", buttons: ['OK'] });
+        }
+    });
+}
+
 function predict(image) {
     loadModel();
     const load = fr.loadImage(image);
@@ -57,12 +87,12 @@ function predict(image) {
         const bestPrediction = recognizer.predictBest(detectedFace[0]);
         console.log(bestPrediction);
         console.log('Detected: ' + bestPrediction.className);
-        if(bestPrediction.distance < 0.6){
+        if (bestPrediction.distance < 0.3) {
             return bestPrediction.className;
-        }else{
+        } else {
             return 'Not able to verify';
         }
-        
+
     }
 
 }
@@ -75,14 +105,52 @@ document.getElementById("verify").addEventListener('click', function () {
         // Save the image in a variable
         var imageBuffer = processBase64Image(data_uri);
         // using filesystem writeFile function
-        fs.writeFile("testFiles/image.jpg", imageBuffer.data, function(err){
+        fs.writeFile("testFiles/image.jpg", imageBuffer.data, function (err) {
             if (err) {
-                console.log("Cannot save the file :'( time to cry !");
+                console.log("Cannot save the file");
             } else {
-                dialog.showMessageBox({ title:"Confirmation", message: "Verified: " + predict("testFiles/image.jpg"), buttons: ['OK'] });
+                dialog.showMessageBox({ title: "Confirmation", message: "Verified: " + predict("testFiles/image.jpg"), buttons: ['OK'] });
             }
         });
-        
+
     });
 }, false);
 // trainNew();
+
+document.getElementById("submit").addEventListener('click', function () {
+    const inputName = document.querySelector('#name').value;
+    console.log(inputName);
+    if (!(/\S/.test(inputName))) {
+        dialog.showMessageBox({ title: "Error", message: "Please Enter Name", buttons: ['OK'] });
+    } else {
+        WebCamera.snap(function (data_uri) {
+            // Save the image in a variable
+            var imageBuffer = processBase64Image(data_uri);
+            // using filesystem writeFile function
+            fs.writeFile("train/image1.jpg", imageBuffer.data, function (err) {
+                if (err) {
+                    console.log("Cannot save the file");
+                } else {
+                    console.log("1st image saved");
+                }
+            });
+            fs.writeFile("train/image2.jpg", imageBuffer.data, function (err) {
+                if (err) {
+                    console.log("Cannot save the file");
+                } else {
+                    console.log("2nd image saved");
+                }
+            });
+            fs.writeFile("train/image3.jpg", imageBuffer.data, function (err) {
+                if (err) {
+                    console.log("Cannot save the file");
+                } else {
+                    console.log("3rd image saved");
+                    trainSingle(inputName, function () {
+                        dialog.showMessageBox({ title: "Trained", message: name + " has been added to the database", buttons: ['OK'] });
+                    });
+                }
+            });
+        });
+    }
+}, false);
