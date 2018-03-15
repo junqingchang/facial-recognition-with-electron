@@ -50,6 +50,7 @@ function trainSingle(singleName) {
     const numJitters = 15;
     var set = [];
     loadModel();
+    var faceImage;
     fs.readdir("train", function (err, files) {
         var flag = false;
         files.forEach(function (image, innerIndex) {
@@ -57,7 +58,7 @@ function trainSingle(singleName) {
             var trainFile = path.join("train", image);
             const targetSize = 200;
             console.log(trainFile);
-            var faceImage = detector.detectFaces(fr.loadImage(trainFile), targetSize);
+            faceImage = detector.detectFaces(fr.loadImage(trainFile), targetSize);
             if (faceImage.length === 0) {
                 flag = true;
                 return;
@@ -74,6 +75,7 @@ function trainSingle(singleName) {
             dialog.showMessageBox({ title: "Error", message: "No face detected, ensure you are looking at the camera", buttons: ['OK'] });
         }
     });
+    return faceImage;
 }
 
 function predict(image) {
