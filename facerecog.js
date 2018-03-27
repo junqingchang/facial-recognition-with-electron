@@ -49,7 +49,7 @@ function loadModel() {
 function trainSingle(singleName) {
     const numJitters = 15;
     var set = [];
-    loadModel();
+    //loadModel();
     var faceImage;
     fs.readdir("train", function (err, files) {
         var flag = false;
@@ -70,7 +70,7 @@ function trainSingle(singleName) {
         try {
             recognizer.addFaces(set, singleName, numJitters);
             const modelState = recognizer.serialize();
-            fs.writeFileSync('model.json', JSON.stringify(modelState));
+            fs.writeFileSync(singleName + '.json', JSON.stringify(modelState));
         } catch (err) {
             dialog.showMessageBox({ title: "Error", message: "No face detected, ensure you are looking at the camera", buttons: ['OK'] });
         }
