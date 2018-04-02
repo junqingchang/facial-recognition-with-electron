@@ -78,6 +78,29 @@ function trainSingle(singleName) {
     return faceImage;
 }
 
+function predictIndividual(image,modelPath) {
+    const modelState = fs.readFileSync(modelPath);
+    const values = JSON.parse(modelState);
+    recognizer.load(values)
+    const load = fr.loadImage(image);
+    const targetSize = 200;
+    var detectedFace = detector.detectFaces(load, targetSize);
+    if (detectedFace.length < 1) {
+        console.log('No face detected');
+    } else {
+        const bestPrediction = recognizer.predictBest(detectedFace[0]);
+        console.log(bestPrediction);
+        console.log('Detected: ' + bestPrediction.className);
+        if (bestPrediction.distance < 0.3) {
+            return bestPrediction.className;
+        } else {
+            return 'Not able to verify';
+        }
+
+    }
+
+}
+
 function predict(image) {
     loadModel();
     const load = fr.loadImage(image);
