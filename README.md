@@ -19,7 +19,7 @@ A step by step series of examples that tell you have to get a development env ru
 Firstly, clone the repo and cd into the folder
 
 ```
-$ git clone https://github.com/jQChang95/testFacial
+$ git clone https://github.com/junqingchang/testFacial
 $ cd testFacial
 ```
 
